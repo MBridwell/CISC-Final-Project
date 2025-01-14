@@ -1,31 +1,45 @@
 import cv2
 import os
 
+
+#file to be spliced for dataset generation
 new_file = "C:\\Users\\Mason\\Desktop\\Project1Temp\\Example"
 os.mkdir(new_file)
 
 
-
+#def for splitting video
 def vidsplit():
-    
+    #save videocapture to a variable -> string of filename
     vidcap = cv2.VideoCapture('test.mp4')
+    #float to take a capture once every x miliseconds, dont want this to be low as to not explode hard drive
     thirtyfps = float(500)
+    #count var
     count = 0
+    #read image from vidcap
     success,image = vidcap.read()
 
+    #while successfully reading images
     while success:
+        #change working directory to new file var
         os.chdir(new_file)
-        cv2.imwrite("input_image_%d .jpg" % count, image)     # save frame as JPEG file      
-        vidcap.set(cv2.CAP_PROP_POS_MSEC,(count*thirtyfps))    # move the time
+        
+        cv2.imwrite("input_image_%d .jpg" % count, image)     # save frame as JPEG file    TODO: needs Labeling for fake data, or real data
+           
+        vidcap.set(cv2.CAP_PROP_POS_MSEC,(count*thirtyfps))    # move the time 500 miliseconds in video
+        #read next image
         success,image = vidcap.read()
+        #successfully read new frame
         print('Read a new frame: ', success)
+        #increase count
         count +=1
+        #release video
     vidcap.release() 
 
 def frecognition(testpicture):
+    #change working directory to new file var
     os.chdir(new_file)
 
-    imagePath = testpicture #image loaded
+    imagePath = testpicture #image loaded -> load pciture to be tested
     img = cv2.imread(imagePath) #reading image
     
     gray_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) #converts image to greyscale
@@ -36,7 +50,7 @@ def frecognition(testpicture):
     face = face_cascade.detectMultiScale(gray_image, 1.3, 5) #actual checking 
 
     print(face)
-    if isinstance(face, tuple):
+    if isinstance(face, tuple): #face values are not stored as a tuple -> if tuple, no face, remove it
         
         print("There is no face in image ", testpicture)
         os.remove(testpicture)
@@ -67,12 +81,16 @@ def frecognition(testpicture):
  #   frecognition(filename)
 
 def main():
+
+    #split frames in video
     vidsplit()
-
+    #change working directory
     os.chdir(new_file)
-
+    #store directory in var directory
     directory = new_file
     
+
+    #iterate throughout all split frames, if no face, remove them
     for filename in os.listdir(directory):
         print(filename)
         frecognition(filename)
