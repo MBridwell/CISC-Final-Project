@@ -10,7 +10,7 @@ os.mkdir(new_file)
 #def for splitting video
 def vidsplit():
     #save videocapture to a variable -> string of filename
-    vidcap = cv2.VideoCapture('test4.mp4')
+    vidcap = cv2.VideoCapture('test3.mp4')
     #float to take a capture once every x miliseconds, dont want this to be low as to not explode hard drive
     thirtyfps = float(500)
     #count var
