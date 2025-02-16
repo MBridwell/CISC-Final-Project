@@ -31,7 +31,7 @@ CNNModel = Sequential([
 # Import custom dataset
 ds_train = tf.keras.preprocessing.image_dataset_from_directory(
     # Folder (training dataset)
-    r'C:\Users\mason\Desktop\Dataset\dataset\dataset\test',  
+    r'C:\Users\mason\Desktop\Dataset\dataset\dataset\train',  
     labels='inferred',
     label_mode="int",
     color_mode='grayscale',
@@ -64,63 +64,64 @@ print(ds_validate)
 #                  loss=tf.keras.losses.BinaryCrossentropy(from_logits=False),  
 #                  metrics=['accuracy'])
 #
-##print the history of the model
-#history = CNNModel.fit(ds_train, epochs=1, 
+###print the history of the model
+#history = CNNModel.fit(ds_train, epochs=2, 
 #                    validation_data=(ds_validate))
-
-# save a model as pkl file
-#with open('cnn_model_revision_1.pkl', 'wb') as f:
+#
+## save a model as pkl file
+#with open('cnn_model_revision_2.pkl', 'wb') as f:
 #   p.dump(CNNModel, f)
 #
 #
-#rint("Model saved as:  cnn_model1.pk_revision_l")
+#print("Model saved as:  cnn_model1.pk_revision_2")
 
 
 #to load and test model after:
-with open('cnn_model_revision_1.pkl', 'rb') as f:
-     loaded_model = p.load(f)
+with open('cnn_model_revision_2.pkl', 'rb') as f:
+    loaded_model = p.load(f)
 
-#Load the model
+predictions = CNNModel.predict(ds_validate.take(10))
+print(predictions)
+
+##Load the model
 print("Model Loaded!")
-#test image path
-image_path = 'test2.png'
-#read the image
+##test image path
+image_path = 'test.jpg'
+##read the image
 image = cv2.imread(image_path)
-#resize the image
+##resize the image
 resized_image = cv2.resize(image,(256, 256))
-#convert it to black and white
+##convert it to black and white
 resize2bw = cv2.cvtColor(resized_image, cv2.COLOR_BGR2GRAY)
-#normalize the image
+##normalize the image
 normalize = resize2bw / 255.0
-#add color channel
+##add color channel
 image_with_channel = np.expand_dims(normalize, axis=-1)
-#add tensor size
+##add tensor size
 image_input = np.expand_dims(image_with_channel, axis=0)
-#predict
+##predict
 predict = loaded_model.predict(image_input)
-#predict logic
-if predict >= 0.5:
-     print("Model predicts Fake")
-else:
-     print("Model Predicts Real")
-#print the prediction (Unsure if working)
+##predict logic
+
+##print the prediction (Unsure if working)
 print(predict)
-
-
-#Test
-
-
-#TODO:
-
- #   Create directory of images to be tested splicer.py can do this, but needs work
- #   Should return a series of images that are a specific resolution that have faces detected with opencv2
- #   pseudocode: 
- #  For i in test set
-#   get image to test
-# perform processing on image
-# predict from trained model (#print(CNNModel.predict(imagedata)
-# if model thinks it is fake, add fake counter
-# if model thinks it is real, add real counter
-# calculate percentage certainty off of counters, return that value as "final guess" (whichever counter is greater, percentage certainty)
-# Opencv2 in theory isn't entirely 100% helpful to identify faces that are ai generated, so there should be a percentage loss as well incase there are false positives.
-# How can i pull faces another way?
+#
+#
+##Test
+#
+#
+##TODO:
+# see why model is predicting extremely high, overfitting issue, misclassifications
+# #   Create directory of images to be tested splicer.py can do this, but needs work
+# #   Should return a series of images that are a specific resolution that have faces detected with opencv2
+# #   pseudocode: 
+# #  For i in test set
+##   get image to test
+## perform processing on image
+## predict from trained model (#print(CNNModel.predict(imagedata)
+## if model thinks it is fake, add fake counter
+## if model thinks it is real, add real counter
+## calculate percentage certainty off of counters, return that value as "final guess" (whichever counter is greater, percentage certainty)
+## Opencv2 in theory isn't entirely 100% helpful to identify faces that are ai generated, so there should be a percentage loss as well incase there are false positives.
+## How can i pull faces another way?
+#
