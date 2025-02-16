@@ -1,3 +1,4 @@
+import pickle as  p
 import tensorflow as tf
 import numpy as np
 from tensorflow.keras import layers  # type: ignore
@@ -58,14 +59,55 @@ ds_validate = tf.keras.preprocessing.image_dataset_from_directory(
 print(ds_validate)
 
 
-#compile the model. Loss and optimizer will need to be changed to improve results
-CNNModel.compile(optimizer='adam',
-                  loss=tf.keras.losses.BinaryCrossentropy(from_logits=False),  
-                  metrics=['accuracy'])
+##compile the model. Loss and optimizer will need to be changed to improve results
+#CNNModel.compile(optimizer='adam',
+#                  loss=tf.keras.losses.BinaryCrossentropy(from_logits=False),  
+#                  metrics=['accuracy'])
+#
+##print the history of the model
+#history = CNNModel.fit(ds_train, epochs=1, 
+#                    validation_data=(ds_validate))
 
-#print the history of the model
-history = CNNModel.fit(ds_train, epochs=1, 
-                    validation_data=(ds_validate))
+# save a model as pkl file
+#with open('cnn_model_revision_1.pkl', 'wb') as f:
+#   p.dump(CNNModel, f)
+#
+#
+#rint("Model saved as:  cnn_model1.pk_revision_l")
+
+
+#to load and test model after:
+with open('cnn_model_revision_1.pkl', 'rb') as f:
+     loaded_model = p.load(f)
+
+#Load the model
+print("Model Loaded!")
+#test image path
+image_path = 'test2.png'
+#read the image
+image = cv2.imread(image_path)
+#resize the image
+resized_image = cv2.resize(image,(256, 256))
+#convert it to black and white
+resize2bw = cv2.cvtColor(resized_image, cv2.COLOR_BGR2GRAY)
+#normalize the image
+normalize = resize2bw / 255.0
+#add color channel
+image_with_channel = np.expand_dims(normalize, axis=-1)
+#add tensor size
+image_input = np.expand_dims(image_with_channel, axis=0)
+#predict
+predict = loaded_model.predict(image_input)
+#predict logic
+if predict >= 0.5:
+     print("Model predicts Fake")
+else:
+     print("Model Predicts Real")
+#print the prediction (Unsure if working)
+print(predict)
+
+
+#Test
 
 
 #TODO:
