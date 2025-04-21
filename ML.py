@@ -7,8 +7,8 @@ from tensorflow.keras.layers import Dense  # type: ignore
 from tensorflow.keras.preprocessing.image import ImageDataGenerator  # type: ignore
 import cv2 # type:ignore
 import os
-import datetime
 import matplotlib.pyplot as plt
+import statistics
 
 #height and width of which the pictures get formatted to
 img_height = 128
@@ -34,16 +34,14 @@ CNNModel = Sequential([
     layers.Dropout(0.5),
     layers.Dense(1, activation = 'sigmoid'),
 
-    
 ])
 
 
 #datasets
 #import training set from kaggle
-# Import custom dataset
+# import custom train
 ds_train = tf.keras.preprocessing.image_dataset_from_directory(
-    # Folder (training dataset)
-    r'C:\Users\mason\Desktop\Dataset\dataset\dataset\train',  
+    r'filepath_here',  
     labels='inferred',
     label_mode="int",
     color_mode='rgb',
@@ -54,9 +52,9 @@ ds_train = tf.keras.preprocessing.image_dataset_from_directory(
 )
 
 #import validation set from kaggle
+#import custom validate
 ds_validate = tf.keras.preprocessing.image_dataset_from_directory(
-    # Folder (validation dataset)
-    r'C:\Users\mason\Desktop\Dataset\dataset\dataset\validate',  
+    r'filepath_here',  
     labels='inferred',
     label_mode="int",
     color_mode='rgb',
@@ -67,24 +65,14 @@ ds_validate = tf.keras.preprocessing.image_dataset_from_directory(
     
 )
 
-ds_test = tf.keras.preprocessing.image_dataset_from_directory(
-    r'C:\Users\mason\Desktop\Dataset\dataset\dataset\test',  
-    labels='inferred',
-    label_mode="int",
-    color_mode='rgb',
-    batch_size=batch_size,
-    class_names=['0', '1'], 
-    image_size=(img_height, img_width),
-    shuffle=False,
-)
 
 
 
 print(ds_validate)
 
 
-##compile the model. Loss and optimizer will need to be changed to improve results
-def compile():
+#compile the model. Loss and optimizer will need to be changed to improve results
+def compile(num_epochs):
     CNNModel.compile(optimizer='Adam',
                       loss=tf.keras.losses.BinaryCrossentropy(from_logits=False),  
                       metrics=[
@@ -94,78 +82,84 @@ def compile():
                         tf.keras.metrics.TrueNegatives(),
                         'accuracy'
                         ])
-    #
+    
     #print the history of the model
-    history = CNNModel.fit(ds_train, epochs=5, 
+    history = CNNModel.fit(ds_train, epochs=num_epochs, 
                         validation_data=(ds_validate))
-    #
-    ## save a model as pkl file
-    with open('cnn_model_revision_6.pkl', 'wb') as f:
+    
+    # save a model as pkl file
+    with open('saved_model_name', 'wb') as f:
        p.dump(CNNModel, f)
 
 
     plt.plot(history.history['accuracy'], label='accuracy')
     plt.plot(history.history['val_accuracy'], label = 'val_accuracy')
-    plt.plot(history.history['false_negatives'], label = 'False negatives')
     plt.xlabel('Epoch')
     plt.ylabel('Accuracy')
     plt.ylim([0, 1])
     plt.legend(loc='lower right')
     plt.show()
-    #
-    #
-    print("Model saved as:  cnn_model_revision_6")
+
+    
     
 
 def test(model_name):
-#to load and test model after:
+#open saved modfel
     with open(model_name, 'rb') as f:
         loaded_model = p.load(f)
 
-   #test_loss, false_negatives, test_accuracy, false_positives = loaded_model.evaluate(ds_test)
+   #code for testing data file paths
+    real_img_path = 'path_to_testing_data_real'
+    fake_img_path = 'path_to_testing_data_fake'
+    
+   #make lists to store float values for averages later 
+    real_pred = []
+    fake_pred = []
+    
 
-   #print("Test Loss: ", test_loss)
-   #print("Test Accuracy: ", test_accuracy)
-   #print("False Negatives: ", false_negatives)
-   #print("False Positives: ", false_positives)
 
-    image_path = 'Test2.png'
+    #for i in each path
+        #image to test = i
+        #preprocess i,
+        #predict
+        #add predict to list
+        #return average of each list.
 
-    image = cv2.imread(image_path)
+    for entry in os.scandir(real_img_path):  
+        entry = preprocess(entry)
+        prediction = loaded_model.predict(entry)
+        #generic debug statement
+        #print("Current Prediction: ", prediction)
+        real_pred.append(float(prediction))
+
+    for entry in os.scandir(fake_img_path):
+        entry = preprocess(entry)
+        prediction = loaded_model.predict(entry)
+        #generic debug statement
+        #print("Current Prediction: ", prediction)
+        fake_pred.append(float(prediction))
+
+
+    print("Final Guess of Real Dataset: ", statistics.mean(real_pred))
+    print("Final Guess of Fake Dataset: ", statistics.mean(fake_pred))
+    
+    
+    
+
+
+def preprocess(entry):
+    #read img
+    image = cv2.imread(entry)
+    #resize
     resized = cv2.resize(image, (128,128))
+    #add additional channels
     image_with_channel = np.expand_dims(resized, axis=-1)
     image_dim = np.expand_dims(image_with_channel, axis=0)
-    prediction = loaded_model.predict(image_dim)
-    print(prediction)
+    #return image_dim as output
+    return image_dim
 
 
 
-    
-   # ####Load the model
-   # print("Model Loaded!")
-   # ####test image path
-   # image_path = 'Image.png'
-   # ####read the image
-   # image = cv2.imread(image_path)
-   # ####resize the image
-   # resized_image = cv2.resize(image,(512, 512))
-   # ####normalize the image
-   # normalize = resized_image / 255.0
-   # ####add color channel
-   # image_with_channel = np.expand_dims(normalize, axis=-1)
-   # ####add tensor size
-   # image_input = np.expand_dims(image_with_channel, axis=0)
-   # ##
-   # ####print the prediction (Unsure if working)
-   # prediction = loaded_model.predict(image_input)
-#
-   # if prediction[0] >=0.5:
-   #     print("Model predicts image to be fake")
-   # else:
-   #     print("Model predicts image to be real")
-
-
-    #print("Raw Prediction:", prediction)
-#
-# compile()
-test('cnn_model_revision_6.pkl')
+#Example function calls to run program
+#compile(10)
+#test('model_name')

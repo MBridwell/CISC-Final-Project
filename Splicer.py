@@ -3,16 +3,16 @@ import os
 
 
 #file to be spliced for dataset generation
-new_file = "C:\\Users\\Mason\\Desktop\\Project1Temp\\Example"
+new_file = "C:\\Users\\mason\\Desktop\\Project1Temp\\"
 os.mkdir(new_file)
 
 
 #def for splitting video
 def vidsplit():
     #save videocapture to a variable -> string of filename
-    vidcap = cv2.VideoCapture('test3.mp4')
+    vidcap = cv2.VideoCapture('TestTwo.mkv')
     #float to take a capture once every x miliseconds, dont want this to be low as to not explode hard drive
-    thirtyfps = float(500)
+    thirtyfps = float(1)
     #count var
     count = 0
     #read image from vidcap
@@ -23,9 +23,9 @@ def vidsplit():
         #change working directory to new file var
         os.chdir(new_file)
         
-        cv2.imwrite("input_image_set_3%d .jpg" % count, image)     # save frame as JPEG file    TODO: needs Labeling for fake data, or real data
+        cv2.imwrite("input_image_set_1%d.jpg" % count, image)     # save frame as JPEG file    TODO: needs Labeling for fake data, or real data
            
-        vidcap.set(cv2.CAP_PROP_POS_MSEC,(count*thirtyfps))    # move the time 500 miliseconds in video
+        vidcap.set(cv2.CAP_PROP_POS_MSEC,(count * thirtyfps))    # move the time 500 miliseconds in video
         #read next image
         success,image = vidcap.read()
         #successfully read new frame
@@ -78,34 +78,7 @@ def frecognition(testpicture):
         print("There is no face in image ", testpicture)
         os.remove(testpicture)
     
-    
 
-        
-
-        
-        
-   # for (x, y, w, h) in face: #draws rectangle around face given in coordinates.
-     #   cv2.rectangle(img, (x, y), (x + w, y + h), (255, 200, 112), 4)
-
-    #img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
-    #cv2.imshow('img',img) #shows image.
-
-    #k = cv2.waitKey(0)
-    #if k == 27:         # wait for ESC key to exit
-     #   cv2.destroyAllWindows()
-    #elif k == ord('s'): # wait for 's' key to save and exit
-     #   cv2.imwrite('messigray.png',img)
-      #  cv2.destroyAllWindows()
-
-#vidsplit()
-#frecognition(parameterLOL)
-#os.chdir(new_file)
-#directory = new_file
-    
-#for filename in os.listdir(directory):
-    #print(filename)
- #   frecognition(filename)
 
 def main():
 
